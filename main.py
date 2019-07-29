@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 
 from tqdm import tqdm
 
+import forbidden_words
+
 pastebin_public_page = "https://pastebin.com/archive"
 save_folder = "/bins"
 
@@ -54,6 +56,9 @@ def main():
 	link_history = []
 	iterations = 0
 
+	forbidden = forbidden_words.get_forbidden_words()
+	print("These words are forbidden and files will not be downloaded if it contains these words: {}".format(forbidden))
+
 	while True:
 		iterations += 1
 		links, link_history = scrapeArchive(link_history)
@@ -68,9 +73,18 @@ def main():
 			for link in tqdm(links):
 				try:
 					response = requests.get(link)
-					with open(os.path.join(folder_dir, link.split("/")[-1] + ".txt"), "w") as file:
-						file.write(str(response.content).strip())
-						file.close()
+					content = response.content
+
+
+					is_forbidden = False
+					for z in forbidden:
+						if(z.lower() in content.lower()):
+							is_forbidden = True
+
+					if(is_forbidden == False):
+						with open(os.path.join(folder_dir, link.split("/")[-1] + ".txt"), "w") as file:
+							file.write(str(content).strip())
+							file.close()
 				except:
 					pass
 
