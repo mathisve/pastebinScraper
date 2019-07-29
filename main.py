@@ -7,35 +7,47 @@ from tqdm import tqdm
 pastebin_public_page = "https://pastebin.com/archive"
 save_folder = "/bins"
 
-def scrapeArchive():
+
+def scrapeArchive(link_history):
 		response = requests.get(pastebin_public_page)
 		content = BeautifulSoup(response.content, "html.parser")
 
 		usable_links = []
 
 		if(type(content) != None):
-			maintable = content.find("table", {"class":"maintable"})
-			for link in maintable.find_all("a"):
-				try:
-					sLink = str(link).split('"') #split link in array with " delimiter to get the link part
-					usable_links.append("https://pastebin.com/raw" + sLink[1])
-				except Exception as e:
-					print(e)
+			try:
+				maintable = content.find("table", {"class":"maintable"})
+				for link in maintable.find_all("a"):
+						sLink = str(link).split('"') #split link in array with " delimiter to get the link part
+						nLink = "https://pastebin.com/raw" + sLink[1]
+						if(nLink not in link_history):
+							usable_links.append(nLink)
+			except Exception as e:
+				print(e)
+
+			link_history = usable_links
+
 		else:
 			print("Content type is None, something is wrong!")
 			exit()
 
-		return usable_links
+		return usable_links, link_history
 
 
 def main():
 	os.chdir(os.getcwd() + save_folder)
+	link_history = []
+	iterations = 0
+
 	while True:
 		folder_dir = os.path.join(os.getcwd(), str(int(time.time())))
 		os.mkdir(folder_dir)
-		links = scrapeArchive()
 
+		iterations += 1
+		links, link_history = scrapeArchive(link_history)
 		sleep_time = 120/len(links)
+		
+		print("{} iterations. {}sec per iteration - {}".format(iterations, round(sleep_time, 2), time.asctime()))
 		for link in tqdm(links):
 			try:
 				response = requests.get(link)
