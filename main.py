@@ -74,21 +74,20 @@ def main():
 				try:
 					response = requests.get(link)
 					content = response.content
-
-
+					
 					is_forbidden = False
 					for z in forbidden:
-						if(z.lower() in content.lower()):
+						if(z.lower() in str(content).lower()):
 							is_forbidden = True
 
 					if(is_forbidden == False):
 						with open(os.path.join(folder_dir, link.split("/")[-1] + ".txt"), "w") as file:
 							file.write(str(content).strip())
 							file.close()
-				except:
-					pass
 
-				time.sleep(sleep_time)
+					time.sleep(sleep_time)
+				except Exception as e:
+					print(e)
 
 		else:
 			print("{} iterations. No new links found, sleeping ...".format(iterations))
