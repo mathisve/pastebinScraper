@@ -71,10 +71,10 @@ def main():
 		
 			print("{} iterations. {}sec per iteration. {} new links found - {}".format(iterations, round(sleep_time, 2),len(links), time.asctime()))
 			for link in tqdm(links):
-				response = requests.get(link)
-				content = response.content
-
 				try:
+					response = requests.get(link)
+					content = response.content
+					
 					is_forbidden = False
 					for z in forbidden:
 						if(z.lower() in str(content).lower()):
